@@ -225,6 +225,7 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
+            ImGui::ShowStyleEditor();
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding,20);
             ImGui::Begin("Hello, world!",(bool*)true,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar    );
@@ -232,29 +233,25 @@ int main(int, char**)
             ImGui::PopStyleVar();
 
             const char* text = "SPAG33TI";
-            ImVec2 text_size = ImGui::CalcTextSize(text); // Get text width
-            ImVec2 window_size = ImGui::GetWindowSize();  // Get window width
+            ImVec2 text_size = ImGui::CalcTextSize(text); 
+            ImVec2 window_size = ImGui::GetWindowSize();  
 
-            // Calculate centered X position
             float text_x = (window_size.x - text_size.x) * 0.5f;
 
-            // Get current cursor Y position to keep it unchanged
             float text_y = ImGui::GetCursorPosY();
 
-            // Set new cursor position (centered X, original Y)
             ImGui::SetCursorPos(ImVec2(text_x, text_y));
             ImGui::Text("%s", text);
             ImGui::Spacing();
             ImGui::Spacing();
             ImGui::Spacing();
             ImGui::Spacing();
-
-            if (ImGui::BeginTabBar("Tab541"))
+            if (ImGui::BeginTabBar("##Tab541"))
             {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing,ImVec2(0,10));
                 ImGui::SetNextItemWidth(150);
 
-                if (ImGui::BeginTabItem("Tab 1"))
+                if (ImGui::BeginTabItem("SPAG33TI 1"))
                 {
                     static bool toggle1 = false;
                     static bool toggle2 = false;
@@ -262,8 +259,11 @@ int main(int, char**)
                     static bool toggle4 = false;
                     static bool toggle5 = false;
                     static bool toggle6 = false;
+                    static float vec4f[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
 
+                    ImGui::SliderFloat("Slider float2", vec4f, 0.0f, 1.0f);
                     ImGui::Toggle("Toggle 1",&toggle1);
+                    
                     ImGui::Toggle("Toggle 2",&toggle2);
                     ImGui::Toggle("Toggle 3",&toggle3);
                     ImGui::Toggle("Toggle 4",&toggle4);
@@ -274,13 +274,14 @@ int main(int, char**)
                 }
 
                 ImGui::SetNextItemWidth(150);
-                if (ImGui::BeginTabItem("Tab 2"))
+                if (ImGui::BeginTabItem("SPAG33TI 2"))
                 {
+                 
                     ImGui::EndTabItem();
                 }
 
                 ImGui::SetNextItemWidth(150);
-                if (ImGui::BeginTabItem("Tab 3"))
+                if (ImGui::BeginTabItem("SPAG33TI  3"))
                 {
                     ImGui::EndTabItem();
                 }

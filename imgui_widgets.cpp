@@ -3214,10 +3214,16 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     const ImGuiStyle& style = g.Style;
     const ImGuiID id = window->GetID(label);
     const float w = CalcItemWidth();
+    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
+    const ImVec2 pos = window->DC.CursorPos;
+    draw_list->Flags |= ImDrawListFlags_AntiAliasedFill | ImDrawListFlags_AntiAliasedLines;
 
     const ImVec2 label_size = CalcTextSize(label, NULL, true);
-    const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
-    const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+    //const ImRect frame_bb(pos + ImVec2(ImGui::GetContentRegionMax().x * .8, 10.0f), pos + ImVec2(width + ImGui::GetContentRegionMax().x * .8, height * 1.5)); //the end of the toggle square and the background? but which is which? 
+
+    const ImRect frame_bb(pos + ImVec2(ImGui::GetContentRegionMax().x * .4 , 10.f), pos + ImVec2(w *1.3f, label_size.y + style.FramePadding.y *1.6));
+    const ImRect total_bb(pos, pos + ImVec2(ImGui::GetContentRegionAvail().x, 45)); 
+    draw_list->AddRectFilled(total_bb.Min, total_bb.Max, ImColor(1.f, 1.f, 1.f, 0.04f), 10.f);
 
     const bool temp_input_allowed = (flags & ImGuiSliderFlags_NoInput) == 0;
     ItemSize(total_bb, style.FramePadding.y);
@@ -3273,8 +3279,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
         MarkItemEdited(id);
 
     // Render grab
-    if (grab_bb.Max.x > grab_bb.Min.x)
-        window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+        window->DrawList->AddRectFilled(grab_bb.Min + ImVec2(2.f,2.f), grab_bb.Max - ImVec2(2.f, 2.f), GetColorU32(ImGuiCol_SliderGrab), style.FrameRounding);
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
     char value_buf[64];
@@ -3284,7 +3289,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
 
     if (label_size.x > 0.0f)
-        RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
+        RenderText(ImVec2(total_bb.Min.x + 18.f, frame_bb.Min.y + 6.25f), label);
 
     IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
     return value_changed;
@@ -9314,7 +9319,7 @@ bool ImGui::Toggle(const char* text, bool* v)
         t = *v ? (t_anim) : (1.0f - t_anim);
     }
 
-    const ImRect frame_bb(pos + ImVec2(ImGui::GetContentRegionMax().x * .8, 10.0f), pos + ImVec2(width + ImGui::GetContentRegionMax().x * .8, height * 1.2)); //the end of the toggle square and the background? but which is which? 
+    const ImRect frame_bb(pos + ImVec2(ImGui::GetContentRegionMax().x * .8, 10.0f), pos + ImVec2(width + ImGui::GetContentRegionMax().x * .8, height * 1.5));
 
     bool pressed = ButtonBehavior(frame_bb, id, &hovered, &held);
 
@@ -9339,8 +9344,8 @@ bool ImGui::Toggle(const char* text, bool* v)
     ImGui::RenderFrameBorder(frame_bb.Min, frame_bb.Max, style.FrameRounding); // Set the radius to 0 to make it squared
     RenderNavHighlight(total_bb, id);
 
-    ImVec2 togglePos = ImVec2(frame_bb.Min.x + t * (width - height), pos.y + 10.0f);
-    ImVec2 toggleSize = ImVec2(height, frame_bb.GetHeight());
+    ImVec2 togglePos = ImVec2(frame_bb.Min.x + 3.f + t * (width - (height +7.f)), pos.y + height / 1.4);
+    ImVec2 toggleSize = ImVec2(height, frame_bb.GetHeight()/1.5);
     draw_list->AddRectFilled(togglePos, togglePos + toggleSize, ImColor(1.f, 1.f, 1.f, 0.8f), style.FrameRounding); // Set the radius to 0 to make it squared
 
     ImVec2 text_pos = ImVec2(total_bb.Min.x + height, frame_bb.Min.y);
@@ -10392,24 +10397,7 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
         ImDrawList* display_draw_list = window->DrawList;
         const ImU32 tab_col = GetColorU32((held) ? ImGuiCol_TabHovered : tab_contents_visible ? (tab_bar_focused ? ImGuiCol_TabSelected : ImGuiCol_TabDimmedSelected) : (tab_bar_focused ? ImGuiCol_Tab : ImGuiCol_TabDimmed));
         TabItemBackground(display_draw_list, bb, flags, tab_col);
-        if (tab_contents_visible && (tab_bar->Flags & ImGuiTabBarFlags_DrawSelectedOverline) && style.TabBarOverlineSize > 0.0f)
-        {
-            // Might be moved to TabItemBackground() ?
-            ImVec2 tl = bb.GetTL() + ImVec2(0, 1.0f * g.CurrentDpiScale);
-            ImVec2 tr = bb.GetTR() + ImVec2(0, 1.0f * g.CurrentDpiScale);
-            ImU32 overline_col = GetColorU32(tab_bar_focused ? ImGuiCol_TabSelectedOverline : ImGuiCol_TabDimmedSelectedOverline);
-            if (style.TabRounding > 0.0f)
-            {
-                float rounding = style.TabRounding;
-                display_draw_list->PathArcToFast(tl + ImVec2(+rounding, +rounding), rounding, 7, 9);
-                display_draw_list->PathArcToFast(tr + ImVec2(-rounding, +rounding), rounding, 9, 11);
-                display_draw_list->PathStroke(overline_col, 0, style.TabBarOverlineSize);
-            }
-            else
-            {
-                display_draw_list->AddLine(tl - ImVec2(0.5f, 0.5f), tr - ImVec2(0.5f, 0.5f), overline_col, style.TabBarOverlineSize);
-            }
-        }
+       
         RenderNavCursor(bb, id);
 
         ImGuiTabBar* tab_bar = g.CurrentTabBar;
@@ -10425,7 +10413,6 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
                 // 🔵 Bottom-Right Arc (3 → 6) ⬇️➡️
                 display_draw_list->PathArcToFast(ImVec2(bb.Min.x + rounding, bb.Max.y - rounding), rounding, 3, 6);
                 display_draw_list->PathStroke(ImColor(0.2627f, 0.2431f, 0.4039f, 1.0f), 0, 2.0f);
-
 
             }
              
