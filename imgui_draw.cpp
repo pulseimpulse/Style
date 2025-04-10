@@ -252,6 +252,7 @@ void ImGui::StyleColorsDark(ImGuiStyle* dst)
     style->WindowBorderSize = 0;
     style->GrabRounding = 30.f;
     style->GrabMinSize = 30;
+    style->PopupBorderSize = 0;
 }
 
 void ImGui::StyleColorsClassic(ImGuiStyle* dst)

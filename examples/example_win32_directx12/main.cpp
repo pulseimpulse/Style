@@ -270,6 +270,25 @@ int main(int, char**)
                     ImGui::Toggle("Toggle 5",&toggle5);
                     ImGui::Toggle("Toggle 6",&toggle6);
 
+                    const char* items[] = { "AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO" };
+                    static int item_selected_idx = 0; // Here we store our selection data as an index.
+                    const char* combo_preview_value = items[item_selected_idx];
+
+                    if (ImGui::BeginCombo("combo 1", combo_preview_value, ImGuiComboFlags_NoArrowButton))
+                    {
+                        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+                        {
+                            const bool is_selected = (item_selected_idx == n);
+                            if (ImGui::Selectable(items[n], is_selected))
+                                item_selected_idx = n;
+
+                            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                            if (is_selected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+
                     ImGui::EndTabItem();
                 }
 
